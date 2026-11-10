@@ -1,0 +1,74 @@
+<div class="order-tracking-container">
+  <header class="tracking-header">
+    <h1 class="tracking-title">
+      <mat-icon class="title-icon">local_shipping</mat-icon>
+      Seguimiento de Órdenes
+    </h1>
+    <div class="connection-status" [class.connected]="isConnected()" [class.error]="connectionError()">
+      <mat-icon>{{ isConnected() ? 'wifi' : 'wifi_off' }}</mat-icon>
+      <span>{{ isConnected() ? 'Conectado' : connectionError() ? 'Error de conexión' : 'Conectando...' }}</span>
+    </div>
+  </header>
+
+  <div class="stats-bar" *ngIf="orders().length > 0">
+    <div class="stat-item">
+      <span class="stat-value">{{ totalOrders() }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-item pending">
+      <span class="stat-value">{{ pendingOrders() }}</span>
+      <span class="stat-label">Pendientes</span>
+    </div>
+    <div class="stat-item processing">
+      <span class="stat-value">{{ processingOrders() }}</span>
+      <span class="stat-label">Procesando</span>
+    </div>
+    <div class="stat-item completed">
+      <span class="stat-value">{{ completedOrders() }}</span>
+      <span class="stat-label">Completadas</span>
+    </div>
+  </div>
+
+  <div class="actions-bar" *ngIf="orders().length > 0">
+    <button mat-stroked-button color="primary" (click)="reconnect()">
+      <mat-icon>refresh</mat-icon>
+      Reconectar
+    </button>
+    <button mat-stroked-button color="warn" (click)="clearOrders()">
+      <mat-icon>delete_outline</mat-icon>
+      Limpiar
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading()">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Conectando al servidor de eventos...</p>
+  </div>
+
+  <div class="error-state" *ngIf="connectionError() && !isLoading()">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h3>Error de Conexión</h3>
+    <p>{{ connectionError() }}</p>
+    <button mat-raised-button color="primary" (click)="reconnect()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading() && !connectionError() && orders().length === 0">
+    <mat-icon class="empty-icon">inbox</mat-icon>
+    <h3>Sin Órdenes</h3>
+    <p>No hay órdenes disponibles. Las órdenes aparecerán aquí cuando se publiquen eventos.</p>
+  </div>
+
+  <div class="orders-grid" *ngIf="orders().length > 0">
+    <app-order-status-card
+      *ngFor="let order of orders(); trackBy: trackByOrderId"
+      [orderId]="order.id"
+      [status]="order.status"
+      [date]="order.date"
+      [lastUpdated]="order.lastUpdated"
+      class="order-card-wrapper">
+    </app-order-status-card>
+  </div>
+</div>
